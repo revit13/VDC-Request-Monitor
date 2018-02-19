@@ -46,11 +46,11 @@ filebeat.prospectors:
     type: nginx
   #  level: debug
   #  review: 1
-  fields_under_root : true
+  #fields_under_root : true
 
-  processors:
-   - decode_json_fields:
-       fields: [ "time_local", "remote_addr", "request", "request_time", "upstream_response_time", "request_id","status", "body_bytes_sent"]
+  #processors:
+   #- decode_json_fields:
+    #   fields: [ "time_local", "remote_addr", "request", "request_time", "upstream_response_time", "request_id","status", "body_bytes_sent"]
   ### Multiline options
 
   # Mutiline can be used for log messages spanning multiple lines. This is common

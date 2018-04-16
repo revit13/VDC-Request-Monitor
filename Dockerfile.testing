@@ -1,0 +1,5 @@
+FROM ditas/vdc-request-monitor:latest
+ENV VDC_PORT=80
+ENV VDC_ADDRESS=google.de
+COPY test.sh /test.sh
+CMD ["sh","/test.sh"]

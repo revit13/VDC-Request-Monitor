@@ -5,7 +5,8 @@ sleep 10
 curl -H 'Content-Type: application/json' -XPUT 'http://elasticsearch:9200/_ingest/pipeline/nginx-pipeline' -d@pipeline.json
 
 # subsitute the env set in the docker-compose file
-envsubst '${OPENTRACING}' < /nginx.conf > /etc/nginx/nginx.conf
+
+envsubst '${VDC_ADDRESS},${VDC_PORT},${OPENTRACING}' < /nginx.conf > /etc/nginx/nginx.conf
 envsubst '${VDC_NAME}' < /etc/filebeat/filebeat.yml > /etc/filebeat/filebeat.yml
 
 #start filebeat and nginx

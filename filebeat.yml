@@ -147,7 +147,7 @@ setup.kibana:
 #-------------------------- Elasticsearch output ------------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["elasticsearch:9200"]
+  hosts: ["${elasticURI}"]
   index: "${VDC_NAME}-%{+YYYY.MM.dd}"
   pipeline: "nginx-pipeline"
 

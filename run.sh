@@ -2,7 +2,7 @@
 echo "starting monitoring proxy for ${VDC_NAME}"
 sleep 10
 # create an ingest node in the ES to map the logdata send by filebeat
-curl -H 'Content-Type: application/json' -XPUT 'http://${elasticURI}:9200/_ingest/pipeline/nginx-pipeline' -d@pipeline.json
+curl -H 'Content-Type: application/json' -XPUT 'http://${elasticURI}/_ingest/pipeline/nginx-pipeline' -d@pipeline.json
 
 # subsitute the env set in the docker-compose file
 

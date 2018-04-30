@@ -12,10 +12,5 @@
         "field": "message"
       }
     }
-  ],
-  "mappings": {
-        "data": {
-          "numeric_detection": true
-        }
-  }
+  ]
 }

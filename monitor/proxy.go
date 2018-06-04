@@ -1,3 +1,17 @@
+//    Copyright 2018 tub
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+
 package monitor
 
 import (
@@ -12,21 +26,30 @@ import (
 )
 
 func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
+	var requestID = mon.generateRequestID(req.RemoteAddr)
 
 	//read payload
+	if mon.conf.ForwardTraffic {
+		body, err := ioutil.ReadAll(req.Body)
 
-	body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			log.Printf("Error reading body: %v", err)
+			http.Error(w, "can't read body", http.StatusBadRequest)
+			return
+		}
 
-	if err != nil {
-		log.Printf("Error reading body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
-		return
+		//enact proxy request
+		req.ContentLength = int64(len(body))
+		req.Body = ioutil.NopCloser(bytes.NewReader(body))
+
+		exchange := exchangeMessage{
+			RequestBody:   string(body),
+			RequestHeader: req.Header,
+		}
+
+		mon.forward(requestID, exchange)
 	}
-
-	//enact proxy request
-	req.URL = mon.conf.EndpointURL
-	req.ContentLength = int64(len(body))
-	req.Body = ioutil.NopCloser(bytes.NewReader(body))
+	req.URL = mon.conf.endpointURL
 
 	//inject tracing header
 	if mon.conf.Opentracing {
@@ -38,7 +61,6 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	//inject looging header
-	var requestID = mon.generateRequestID(req.RemoteAddr)
 	req.Header.Set("X-DITAS-RequestID", requestID)
 
 	//forward the request
@@ -54,16 +76,12 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	mon.push(requestID, meter)
-
-	exchange := exchangeMessage{
-		RequestBody:   string(body),
-		RequestHeader: req.Header,
-	}
-	mon.forward(requestID, exchange)
-
 }
 
 func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
+	if !mon.conf.ForwardTraffic {
+		return nil
+	}
 
 	//read the body and reset the reader (otherwise it will not be availible to the client)
 	body, err := ioutil.ReadAll(resp.Body)

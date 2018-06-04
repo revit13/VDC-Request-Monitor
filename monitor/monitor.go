@@ -1,3 +1,17 @@
+//    Copyright 2018 tub
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+
 package monitor
 
 import (
@@ -78,12 +92,14 @@ func NewManger(confdir string) (*RequestMonitor, error) {
 	}
 	mng.reporter = reporter
 
-	exporter, err := newExchangeReporter(configuration.ExchangeReporterURL, mng.exchangeQueue)
-	if err != nil {
-		log.Errorf("Failed to init exchange reporter %+v", err)
-		return nil, err
+	if configuration.ForwardTraffic {
+		exporter, err := newExchangeReporter(configuration.ExchangeReporterURL, mng.exchangeQueue)
+		if err != nil {
+			log.Errorf("Failed to init exchange reporter %+v", err)
+			return nil, err
+		}
+		mng.exporter = exporter
 	}
-	mng.exporter = exporter
 
 	log.Info("Request-Monitor created")
 
@@ -155,9 +171,11 @@ func (mon *RequestMonitor) push(requestID string, message meterMessage) {
 }
 
 func (mon *RequestMonitor) forward(requestID string, message exchangeMessage) {
-	message.RequestID = requestID
-	message.Timestamp = time.Now()
-	mon.exchangeQueue <- message
+	if mon.conf.ForwardTraffic {
+		message.RequestID = requestID
+		message.Timestamp = time.Now()
+		mon.exchangeQueue <- message
+	}
 }
 
 //Listen will start all worker threads and wait for incoming requests
@@ -165,10 +183,13 @@ func (mon *RequestMonitor) Listen() {
 
 	//start parallel reporter threads
 	mon.reporter.Start()
-	mon.exporter.Start()
+
+	if mon.conf.ForwardTraffic {
+		mon.exporter.Start()
+		defer mon.exporter.Stop()
+	}
 
 	defer mon.reporter.Stop()
-	defer mon.exporter.Stop()
 
 	var m *autocert.Manager
 	if mon.conf.UseACME {

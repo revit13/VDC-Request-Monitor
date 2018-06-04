@@ -1,8 +1,9 @@
 {
-    "Endpoint":"http://127.0.0.1:8050",
-    "ZipkinEndpoint":"",
-    "ExchangeReporterURL":"",
-    "ElasticSearchURL":"",
-    "VDCName":"",
-    "Opentracing":"false"
+    "Endpoint":"http://127.0.0.1:8888",
+    "ExchangeReporterURL":"http://127.0.0.1:8888",
+    "ElasticSearchURL":"http://127.0.0.1:9200",
+    "VDCName":"tubvdc",
+    "Opentracing":false,
+    "UseSelfSigned":true,
+    "ForwardTraffic":true
 }

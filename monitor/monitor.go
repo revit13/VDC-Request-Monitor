@@ -1,6 +1,9 @@
 package monitor
 
 import (
+	"context"
+	"crypto/tls"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -9,6 +12,9 @@ import (
 
 	opentracing "github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	"golang.org/x/crypto/acme/autocert"
+
+	"github.com/kabukky/httpscerts"
 
 	"github.com/vulcand/oxy/forward"
 	"github.com/vulcand/oxy/utils"
@@ -142,25 +148,6 @@ func (mon *RequestMonitor) initTracing() error {
 	return nil
 }
 
-//Listen will start all worker threads and wait for incoming requests
-func (mon *RequestMonitor) Listen() {
-	s := &http.Server{
-		Addr:    ":80",
-		Handler: http.HandlerFunc(mon.serve),
-	}
-
-	//start parallel reporter threads
-	mon.reporter.Start()
-	mon.exporter.Start()
-
-	defer mon.reporter.Stop()
-	defer mon.exporter.Stop()
-
-	log.Info("request-monitor ready")
-	s.ListenAndServe()
-
-}
-
 func (mon *RequestMonitor) push(requestID string, message meterMessage) {
 	message.RequestID = requestID
 	message.Timestamp = time.Now()
@@ -171,4 +158,80 @@ func (mon *RequestMonitor) forward(requestID string, message exchangeMessage) {
 	message.RequestID = requestID
 	message.Timestamp = time.Now()
 	mon.exchangeQueue <- message
+}
+
+//Listen will start all worker threads and wait for incoming requests
+func (mon *RequestMonitor) Listen() {
+
+	//start parallel reporter threads
+	mon.reporter.Start()
+	mon.exporter.Start()
+
+	defer mon.reporter.Stop()
+	defer mon.exporter.Stop()
+
+	var m *autocert.Manager
+	if mon.conf.UseACME {
+
+		m = &autocert.Manager{
+			Email:  "werner@tu-berlin.de",
+			Prompt: autocert.AcceptTOS,
+			HostPolicy: func(ctx context.Context, host string) error {
+				//TODO: add sensible host model
+				return nil
+			},
+			Cache: autocert.DirCache(".certs"),
+		}
+
+		httpsServer := &http.Server{
+			Addr:      ":443",
+			Handler:   http.HandlerFunc(mon.serve),
+			TLSConfig: &tls.Config{GetCertificate: m.GetCertificate},
+		}
+
+		go func() {
+
+			err := httpsServer.ListenAndServeTLS("", "")
+			if err != nil {
+				log.Fatalf("httpsSrv.ListendAndServeTLS() failed with %s", err)
+			}
+		}()
+	} else if mon.conf.UseSelfSigned {
+		cert := fmt.Sprintf("%scert.pem", mon.conf.configDir)
+		key := fmt.Sprintf("%skey.pem", mon.conf.configDir)
+
+		err := httpscerts.Check(cert, key)
+		if err != nil {
+			log.Info("could not load self signed keys - generationg some")
+			err = httpscerts.Generate(cert, key, "127.0.0.1:443")
+			if err != nil {
+				log.Fatal("Error: Couldn't create https certs.")
+			}
+		}
+		httpsServer := &http.Server{
+			Addr:    ":443",
+			Handler: http.HandlerFunc(mon.serve),
+		}
+		go func() {
+
+			err := httpsServer.ListenAndServeTLS(cert, key)
+			if err != nil {
+				log.Fatalf("httpsSrv.ListendAndServeTLS() failed with %s", err)
+			}
+		}()
+	}
+
+	httpServer := &http.Server{
+		Addr: ":80",
+	}
+
+	if m != nil {
+		httpServer.Handler = m.HTTPHandler(http.HandlerFunc(mon.serve))
+	} else {
+		httpServer.Handler = http.HandlerFunc(mon.serve)
+	}
+
+	log.Info("request-monitor ready")
+	httpServer.ListenAndServe()
+
 }

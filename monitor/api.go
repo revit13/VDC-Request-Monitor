@@ -21,6 +21,11 @@ type Configuration struct {
 
 	Opentracing    bool
 	ZipkinEndpoint string
+
+	UseACME       bool
+	UseSelfSigned bool
+
+	configDir string
 }
 
 type meterMessage struct {
@@ -60,6 +65,6 @@ func readConfig(dir string) (Configuration, error) {
 	}
 
 	configuration.EndpointURL = url
-
+	configuration.configDir = dir
 	return configuration, nil
 }

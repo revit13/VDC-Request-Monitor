@@ -10,5 +10,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a --installsuffix cgo --ldflags="-s" -o r
 
 FROM alpine:3.4
 COPY --from=build /go/src/github.com/DITAS-Project/Request-Monitor/request-monitor request-monitor
-ADD .config/monitor.json .config/monitor.json
+ADD .config/monitor.json.example .config/monitor.json
 CMD [ "./request-monitor" ]

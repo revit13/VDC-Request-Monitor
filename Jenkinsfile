@@ -6,7 +6,7 @@ pipeline {
                 echo 'Creating the image...'
                 // This will search for a Dockerfile in the src folder and will build the image to the local repository
                 // Using latest tag to override tha newest image in the hub
-                sh "docker build -f -t \"ditas/vdc-request-monitor:latest\" ."
+                sh "docker build -t \"ditas/vdc-request-monitor:latest\" ."
                 echo "Done"
             }
         }

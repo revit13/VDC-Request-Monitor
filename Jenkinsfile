@@ -6,7 +6,7 @@ pipeline {
                 echo 'Creating the image...'
                 // This will search for a Dockerfile in the src folder and will build the image to the local repository
                 // Using latest tag to override tha newest image in the hub
-                sh "docker build -t \"ditas/vdc-request-monitor:latest\" ."
+                sh "docker build -t \"ditas/vdc-request-monitor:nginx\" ."
                 echo "Done"
             }
         }
@@ -23,9 +23,9 @@ pipeline {
                 echo 'Login to Docker Hub as ditasgeneric...'
                 sh "docker login -u ditasgeneric -p ${password}"
                 echo "Done"
-                echo "Pushing the image ditas/vdc-request-monitor:latest..."
+                echo "Pushing the image ditas/vdc-request-monitor:nginx..."
                 // Push the image to DockerHub
-                sh "docker push ditas/vdc-request-monitor:latest"
+                sh "docker push ditas/vdc-request-monitor:nginx"
                 echo "Done"
             }
         }

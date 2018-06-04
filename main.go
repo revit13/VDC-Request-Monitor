@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/DITAS-Project/Request-Monitor/monitor"
+	"github.com/DITAS-Project/VDC-Request-Monitor/monitor"
 	log "github.com/sirupsen/logrus"
 )
 

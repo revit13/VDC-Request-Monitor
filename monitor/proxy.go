@@ -97,7 +97,7 @@ func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
 	resp.Body = ioutil.NopCloser(bytes.NewReader(body))
 
 	//extract requestID
-	requestID := resp.Request.Header.Get("X-DITAS-RequestId")
+	requestID := resp.Request.Header.Get("X-DITAS-RequestID")
 	if requestID == "" {
 		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
 	}

@@ -71,7 +71,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	//report all logging information
 	meter := meterMessage{
 		Client:      req.RemoteAddr,
-		Method:      req.URL.String(),
+		Method:      req.RequestURI,
 		RequestTime: end,
 	}
 

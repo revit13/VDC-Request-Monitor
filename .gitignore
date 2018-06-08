@@ -1,7 +1,7 @@
 /vendor
-Request-Monitor
 .lock
 .config/monitor.json
 .vscode/launch.json
 Gopkg.lock
 debug
+VDC-Request-Monitor

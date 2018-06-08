@@ -16,9 +16,9 @@ package monitor
 
 import (
 	"context"
-	"fmt"
 	"time"
 
+	"github.com/DITAS-Project/TUBUtil/util"
 	"github.com/olivere/elastic"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,7 +35,7 @@ type elasticReporter struct {
 //will fail if no elastic client can be built
 //otherwise retunrs a worker handler
 func newElasticReporter(config Configuration, queue chan meterMessage) (elasticReporter, error) {
-	//Wait for endpoint to become availible or timeout with error
+	util.WaitForAvailible(config.ElasticSearchURL, nil)
 
 	client, err := elastic.NewClient(
 		elastic.SetURL(config.ElasticSearchURL),
@@ -95,6 +95,5 @@ func (er *elasticReporter) Stop() {
 }
 
 func (er *elasticReporter) getElasticIndex() string {
-	t := time.Now()
-	return fmt.Sprintf("%s-%d-%02d-%02d", er.VDCName, t.Year(), t.Month(), t.Day())
+	return util.GetElasticIndex(er.VDCName)
 }

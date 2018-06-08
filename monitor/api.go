@@ -49,9 +49,9 @@ type meterMessage struct {
 
 	Timestamp time.Time `json:"@timestamp"`
 
-	Client      string
-	Method      string
-	RequestTime time.Duration
+	Client      string        `json:"request.client"`
+	Method      string        `json:"request.method"`
+	RequestTime time.Duration `json:"request.requestTime"`
 }
 
 type exchangeMessage struct {

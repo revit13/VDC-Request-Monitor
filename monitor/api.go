@@ -15,13 +15,13 @@
 package monitor
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tkanos/gonfig"
+	"github.com/spf13/viper"
 )
 
 type Configuration struct {
@@ -66,13 +66,16 @@ type exchangeMessage struct {
 	ResponseHeader http.Header
 }
 
-func readConfig(dir string) (Configuration, error) {
+func readConfig() (Configuration, error) {
+
+	err := viper.ReadInConfig()
 	configuration := Configuration{}
-	err := gonfig.GetConf(fmt.Sprintf("%smonitor.json", dir), &configuration)
 	if err != nil {
 		log.Error("failed to load config", err)
 		return configuration, err
 	}
+
+	viper.Unmarshal(&configuration)
 
 	url, err := url.Parse(configuration.Endpoint)
 	if err != nil {
@@ -81,6 +84,7 @@ func readConfig(dir string) (Configuration, error) {
 	}
 
 	configuration.endpointURL = url
-	configuration.configDir = dir
+	configuration.configDir = filepath.Dir(viper.ConfigFileUsed())
+	log.Infof("using this config %+v", configuration)
 	return configuration, nil
 }

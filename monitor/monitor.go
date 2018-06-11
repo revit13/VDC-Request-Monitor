@@ -17,11 +17,11 @@ package monitor
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
@@ -51,9 +51,9 @@ type RequestMonitor struct {
 }
 
 //NewManger Creates a new logging, tracing RequestMonitor
-func NewManger(confdir string) (*RequestMonitor, error) {
+func NewManger() (*RequestMonitor, error) {
 
-	configuration, err := readConfig(confdir)
+	configuration, err := readConfig()
 	if err != nil {
 		log.Error("could not read config!")
 		return nil, err
@@ -218,8 +218,8 @@ func (mon *RequestMonitor) Listen() {
 			}
 		}()
 	} else if mon.conf.UseSelfSigned {
-		cert := fmt.Sprintf("%scert.pem", mon.conf.configDir)
-		key := fmt.Sprintf("%skey.pem", mon.conf.configDir)
+		cert := filepath.Join(mon.conf.configDir, "cert.pem")
+		key := filepath.Join(mon.conf.configDir, "key.pem")
 
 		err := httpscerts.Check(cert, key)
 		if err != nil {

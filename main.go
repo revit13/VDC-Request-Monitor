@@ -31,6 +31,8 @@ func main() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
+	log.SetLevel(log.DebugLevel)
+
 	//
 	mon, err := monitor.NewManger()
 

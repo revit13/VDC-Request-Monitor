@@ -70,10 +70,10 @@ func (er *elasticReporter) Start() {
 
 				work.Timestamp = time.Now()
 
-				_, err := er.Client.Index().Index(er.getElasticIndex()).Type("request-monitor").BodyJson(work).Do(er.ctx)
+				_, err := er.Client.Index().Index(er.getElasticIndex()).Type("data").BodyJson(work).Do(er.ctx)
 
 				if err != nil {
-					log.Debug("failed to report mesurement to :%s", err)
+					log.Debug("failed to report mesurement to", err)
 				} else {
 					log.Debug("reported data to elastic!")
 				}

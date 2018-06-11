@@ -49,6 +49,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 
 		mon.forward(requestID, exchange)
 	}
+	method := req.URL.Path
 	req.URL = mon.conf.endpointURL
 
 	//inject tracing header
@@ -71,7 +72,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	//report all logging information
 	meter := meterMessage{
 		Client:      req.RemoteAddr,
-		Method:      req.RequestURI,
+		Method:      method,
 		RequestTime: end,
 	}
 

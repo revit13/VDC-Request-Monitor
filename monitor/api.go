@@ -45,7 +45,7 @@ type Configuration struct {
 }
 
 type meterMessage struct {
-	RequestID string
+	RequestID string `json:"request.id"`
 
 	Timestamp time.Time `json:"@timestamp"`
 

@@ -47,23 +47,27 @@ type Configuration struct {
 type meterMessage struct {
 	RequestID string `json:"request.id"`
 
-	Timestamp time.Time `json:"@timestamp"`
+	Timestamp     time.Time     `json:"@timestamp"`
+	RequestLenght int64         `json:"request.length"`
+	Kind          string        `json:"request.method, omitempty"`
+	Client        string        `json:"request.client, omitempty"`
+	Method        string        `json:"request.path, omitempty"`
+	RequestTime   time.Duration `json:"request.requestTime"`
 
-	Client      string        `json:"request.client"`
-	Method      string        `json:"request.method"`
-	RequestTime time.Duration `json:"request.requestTime"`
+	ResponseCode   int   `json:"response.code, omitempty"`
+	ResponseLength int64 `json:"response.length, omitempty"`
 }
 
 type exchangeMessage struct {
-	RequestID string
+	RequestID string `json:"id"`
 
 	Timestamp time.Time `json:"@timestamp"`
 
-	RequestBody   string
-	RequestHeader http.Header
+	RequestBody   string      `json:"request.body, omitempty"`
+	RequestHeader http.Header `json:"request.header, omitempty"`
 
-	ResponseBody   string
-	ResponseHeader http.Header
+	ResponseBody   string      `json:"response.body, omitempty"`
+	ResponseHeader http.Header `json:"response.header, omitempty"`
 }
 
 func readConfig() (Configuration, error) {

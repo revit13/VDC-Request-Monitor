@@ -21,7 +21,6 @@ import (
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -71,15 +70,30 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 
 	//report all logging information
 	meter := meterMessage{
-		Client:      req.RemoteAddr,
-		Method:      method,
-		RequestTime: end,
+		Client:        req.RemoteAddr,
+		Method:        method,
+		Kind:          req.Method,
+		RequestLenght: req.ContentLength,
+		RequestTime:   end,
 	}
 
 	mon.push(requestID, meter)
 }
 
 func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
+	//extract requestID
+	requestID := resp.Request.Header.Get("X-DITAS-RequestID")
+	if requestID == "" {
+		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
+	}
+
+	meter := meterMessage{
+		RequestID:      requestID,
+		ResponseCode:   resp.StatusCode,
+		ResponseLength: resp.ContentLength,
+	}
+	mon.push(requestID, meter)
+
 	if !mon.conf.ForwardTraffic {
 		return nil
 	}
@@ -97,11 +111,6 @@ func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
 	resp.ContentLength = int64(len(body))
 	resp.Body = ioutil.NopCloser(bytes.NewReader(body))
 
-	//extract requestID
-	requestID := resp.Request.Header.Get("X-DITAS-RequestID")
-	if requestID == "" {
-		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
-	}
 	//report logging information
 	exchange := exchangeMessage{
 		ResponseBody:   string(body),

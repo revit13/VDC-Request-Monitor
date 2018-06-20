@@ -17,6 +17,7 @@ package monitor
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -131,7 +132,8 @@ func handleError(w http.ResponseWriter, req *http.Request, err error) {
 }
 
 func (mon *RequestMonitor) generateRequestID(remoteAddr string) string {
-	return uuid.NewV5(uuid.NamespaceX500, remoteAddr).String()
+	now := time.Now()
+	return uuid.NewV5(uuid.NamespaceX500, fmt.Sprintf("%s-%d-%d", remoteAddr, now.Day(), now.Minute())).String()
 }
 
 func (mon *RequestMonitor) initTracing() error {

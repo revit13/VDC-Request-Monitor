@@ -49,13 +49,13 @@ type meterMessage struct {
 
 	Timestamp     time.Time     `json:"@timestamp"`
 	RequestLenght int64         `json:"request.length"`
-	Kind          string        `json:"request.method, omitempty"`
-	Client        string        `json:"request.client, omitempty"`
-	Method        string        `json:"request.path, omitempty"`
+	Kind          string        `json:"request.method,omitempty"`
+	Client        string        `json:"request.client,omitempty"`
+	Method        string        `json:"request.path,omitempty"`
 	RequestTime   time.Duration `json:"request.requestTime"`
 
-	ResponseCode   int   `json:"response.code, omitempty"`
-	ResponseLength int64 `json:"response.length, omitempty"`
+	ResponseCode   int   `json:"response.code,omitempty"`
+	ResponseLength int64 `json:"response.length,omitempty"`
 }
 
 type exchangeMessage struct {
@@ -63,11 +63,11 @@ type exchangeMessage struct {
 
 	Timestamp time.Time `json:"@timestamp"`
 
-	RequestBody   string      `json:"request.body, omitempty"`
-	RequestHeader http.Header `json:"request.header, omitempty"`
+	RequestBody   string      `json:"request.body,omitempty"`
+	RequestHeader http.Header `json:"request.header,omitempty"`
 
-	ResponseBody   string      `json:"response.body, omitempty"`
-	ResponseHeader http.Header `json:"response.header, omitempty"`
+	ResponseBody   string      `json:"response.body,omitempty"`
+	ResponseHeader http.Header `json:"response.header,omitempty"`
 }
 
 func readConfig() (Configuration, error) {

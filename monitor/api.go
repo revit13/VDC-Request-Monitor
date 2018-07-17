@@ -44,7 +44,7 @@ type Configuration struct {
 	ExchangeReporterURL string
 }
 
-type meterMessage struct {
+type MeterMessage struct {
 	RequestID string `json:"request.id"`
 
 	Timestamp     time.Time     `json:"@timestamp"`

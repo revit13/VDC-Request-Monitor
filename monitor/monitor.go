@@ -44,7 +44,7 @@ type RequestMonitor struct {
 	conf Configuration
 	oxy  *forward.Forwarder
 
-	monitorQueue  chan meterMessage
+	monitorQueue  chan MeterMessage
 	exchangeQueue chan exchangeMessage
 
 	reporter elasticReporter
@@ -62,7 +62,7 @@ func NewManger() (*RequestMonitor, error) {
 
 	mng := &RequestMonitor{
 		conf:          configuration,
-		monitorQueue:  make(chan meterMessage, 10),
+		monitorQueue:  make(chan MeterMessage, 10),
 		exchangeQueue: make(chan exchangeMessage, 10),
 	}
 
@@ -86,7 +86,7 @@ func NewManger() (*RequestMonitor, error) {
 
 	mng.oxy = fwd
 
-	reporter, err := newElasticReporter(configuration, mng.monitorQueue)
+	reporter, err := NewElasticReporter(configuration, mng.monitorQueue)
 	if err != nil {
 		log.Errorf("Failed to init elastic reporter %+v", err)
 		return nil, err
@@ -166,7 +166,7 @@ func (mon *RequestMonitor) initTracing() error {
 	return nil
 }
 
-func (mon *RequestMonitor) push(requestID string, message meterMessage) {
+func (mon *RequestMonitor) push(requestID string, message MeterMessage) {
 	message.RequestID = requestID
 	message.Timestamp = time.Now()
 	mon.monitorQueue <- message

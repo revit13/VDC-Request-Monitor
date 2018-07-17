@@ -69,7 +69,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	end := time.Now().Sub(start)
 
 	//report all logging information
-	meter := meterMessage{
+	meter := MeterMessage{
 		Client:        req.RemoteAddr,
 		Method:        method,
 		Kind:          req.Method,
@@ -87,7 +87,7 @@ func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
 		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
 	}
 
-	meter := meterMessage{
+	meter := MeterMessage{
 		RequestID:      requestID,
 		ResponseCode:   resp.StatusCode,
 		ResponseLength: resp.ContentLength,

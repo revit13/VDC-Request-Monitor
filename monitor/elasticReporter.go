@@ -24,17 +24,17 @@ import (
 )
 
 type elasticReporter struct {
-	Queue    chan meterMessage
+	Queue    chan MeterMessage
 	Client   *elastic.Client
 	VDCName  string
 	QuitChan chan bool
 	ctx      context.Context
 }
 
-//newElasticReporter creates a new reporter worker,
+//NewElasticReporter creates a new reporter worker,
 //will fail if no elastic client can be built
 //otherwise retunrs a worker handler
-func newElasticReporter(config Configuration, queue chan meterMessage) (elasticReporter, error) {
+func NewElasticReporter(config Configuration, queue chan MeterMessage) (elasticReporter, error) {
 	util.WaitForAvailible(config.ElasticSearchURL, nil)
 
 	client, err := elastic.NewClient(

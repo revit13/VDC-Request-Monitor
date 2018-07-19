@@ -1,0 +1,8 @@
+{
+    "Endpoint":"http://127.0.0.1:8080",
+    "ElasticSearchURL":"http://127.0.0.1:9200",
+    "VDCName":"testing",
+    "Opentracing":false,
+    "UseSelfSigned":false,
+    "ForwardTraffic":false
+}

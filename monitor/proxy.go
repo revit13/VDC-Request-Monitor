@@ -27,6 +27,7 @@ import (
 func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	var requestID = mon.generateRequestID(req.RemoteAddr)
 
+	var exchange exchangeMessage
 	//read payload
 	if mon.conf.ForwardTraffic {
 		body, err := ioutil.ReadAll(req.Body)
@@ -41,15 +42,16 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 		req.ContentLength = int64(len(body))
 		req.Body = ioutil.NopCloser(bytes.NewReader(body))
 
-		exchange := exchangeMessage{
+		exchange = exchangeMessage{
 			RequestBody:   string(body),
 			RequestHeader: req.Header,
 		}
 
-		mon.forward(requestID, exchange)
 	}
 	method := req.URL.Path
 	req.URL = mon.conf.endpointURL
+
+	operationID := mon.extractOperationId(req)
 
 	//inject tracing header
 	if mon.conf.Opentracing {
@@ -62,6 +64,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 
 	//inject looging header
 	req.Header.Set("X-DITAS-RequestID", requestID)
+	req.Header.Set("X-DITAS-OperationID", operationID)
 
 	//forward the request
 	start := time.Now()
@@ -70,6 +73,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 
 	//report all logging information
 	meter := MeterMessage{
+		OperationID:   operationID,
 		Client:        req.RemoteAddr,
 		Method:        method,
 		Kind:          req.Method,
@@ -78,6 +82,23 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	mon.push(requestID, meter)
+
+	if mon.conf.ForwardTraffic {
+		exchange.OperationID = operationID
+		exchange.Client = req.RemoteAddr
+		exchange.Method = method
+		exchange.Kind = req.Method
+		exchange.RequestLenght = req.ContentLength
+		exchange.RequestTime = end
+		exchange.RequestID = requestID
+
+		mon.forward(requestID, exchange)
+	}
+}
+
+func (mon *RequestMonitor) extractOperationId(req *http.Request) string {
+
+	return ""
 }
 
 func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
@@ -87,7 +108,10 @@ func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
 		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
 	}
 
+	operationID := resp.Request.Header.Get("X-DITAS-OperationID")
+
 	meter := MeterMessage{
+		OperationID:    operationID,
 		RequestID:      requestID,
 		ResponseCode:   resp.StatusCode,
 		ResponseLength: resp.ContentLength,
@@ -116,6 +140,12 @@ func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
 		ResponseBody:   string(body),
 		ResponseHeader: resp.Header,
 	}
+
+	exchange.OperationID = operationID
+	exchange.RequestID = requestID
+	exchange.ResponseCode = resp.StatusCode
+	exchange.ResponseLength = resp.ContentLength
+
 	mon.forward(requestID, exchange)
 	return nil
 }

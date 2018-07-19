@@ -45,7 +45,8 @@ type Configuration struct {
 }
 
 type MeterMessage struct {
-	RequestID string `json:"request.id"`
+	RequestID   string `json:"request.id"`
+	OperationID string `json:"request.operationID"`
 
 	Timestamp     time.Time     `json:"@timestamp"`
 	RequestLenght int64         `json:"request.length"`
@@ -59,6 +60,7 @@ type MeterMessage struct {
 }
 
 type exchangeMessage struct {
+	MeterMessage
 	RequestID string `json:"id"`
 
 	Timestamp time.Time `json:"@timestamp"`

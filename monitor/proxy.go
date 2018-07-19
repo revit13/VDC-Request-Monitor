@@ -51,7 +51,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	method := req.URL.Path
 	req.URL = mon.conf.endpointURL
 
-	operationID := mon.extractOperationId(req)
+	operationID := mon.extractOperationId(req.URL.Path, req.Method)
 
 	//inject tracing header
 	if mon.conf.Opentracing {
@@ -96,7 +96,7 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (mon *RequestMonitor) extractOperationId(req *http.Request) string {
+func (mon *RequestMonitor) extractOperationId(path string, method string) string {
 
 	return ""
 }

@@ -36,13 +36,15 @@ import (
 
 	"github.com/satori/go.uuid"
 
+	spec "github.com/DITAS-Project/blueprint-go"
 	log "github.com/sirupsen/logrus"
 )
 
 //RequestMonitor data struct
 type RequestMonitor struct {
-	conf Configuration
-	oxy  *forward.Forwarder
+	conf      Configuration
+	blueprint *spec.BlueprintType
+	oxy       *forward.Forwarder
 
 	monitorQueue  chan MeterMessage
 	exchangeQueue chan exchangeMessage
@@ -59,6 +61,8 @@ func NewManger() (*RequestMonitor, error) {
 		log.Error("could not read config!")
 		return nil, err
 	}
+
+	spec.ReadBlueprint(filepath.Join(configuration.configDir, "blueprint.json"))
 
 	mng := &RequestMonitor{
 		conf:          configuration,

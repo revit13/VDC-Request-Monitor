@@ -34,9 +34,8 @@ import (
 	"github.com/vulcand/oxy/forward"
 	"github.com/vulcand/oxy/utils"
 
-	"github.com/satori/go.uuid"
-
 	spec "github.com/DITAS-Project/blueprint-go"
+	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -51,6 +50,8 @@ type RequestMonitor struct {
 
 	reporter elasticReporter
 	exporter exchangeReporter
+
+	cache ResouceCache
 }
 
 //NewManger Creates a new logging, tracing RequestMonitor
@@ -62,12 +63,18 @@ func NewManger() (*RequestMonitor, error) {
 		return nil, err
 	}
 
-	spec.ReadBlueprint(filepath.Join(configuration.configDir, "blueprint.json"))
+	blueprint, err := spec.ReadBlueprint(filepath.Join(configuration.configDir, "blueprint.json"))
+
+	if err != nil {
+		log.Warn("could not read blueprint (monitoring quality will be degraded)")
+	}
 
 	mng := &RequestMonitor{
 		conf:          configuration,
+		blueprint:     blueprint,
 		monitorQueue:  make(chan MeterMessage, 10),
 		exchangeQueue: make(chan exchangeMessage, 10),
+		cache:         NewResoruceCache(blueprint),
 	}
 
 	err = mng.initTracing()

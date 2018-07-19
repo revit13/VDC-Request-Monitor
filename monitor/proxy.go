@@ -98,7 +98,13 @@ func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {
 
 func (mon *RequestMonitor) extractOperationId(path string, method string) string {
 
-	return ""
+	optID, err := mon.cache.Match(path, method)
+
+	if err != nil {
+		log.Debug("failed to match %s %s - %+v", path, method, err)
+	}
+
+	return optID
 }
 
 func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {

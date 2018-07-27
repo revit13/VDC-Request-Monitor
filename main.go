@@ -12,6 +12,7 @@ import (
 func main() {
 	viper.SetConfigName("monitor")
 	viper.AddConfigPath("/.config/")
+	viper.AddConfigPath("/opt/blueprint/")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath(".config/")
 	//setup defaults

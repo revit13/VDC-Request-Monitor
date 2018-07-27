@@ -108,13 +108,25 @@ func (mon *RequestMonitor) extractOperationId(path string, method string) string
 }
 
 func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
+
+	if resp == nil {
+		//in this case the request failed to produce a response
+		log.Warn("Empty response.")
+		return nil
+	}
+
 	//extract requestID
-	requestID := resp.Request.Header.Get("X-DITAS-RequestID")
+	var requestID string
+	var operationID string
+
+	if resp.Request != nil {
+		requestID = resp.Request.Header.Get("X-DITAS-RequestID")
+		operationID = resp.Request.Header.Get("X-DITAS-OperationID")
+	}
+
 	if requestID == "" {
 		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
 	}
-
-	operationID := resp.Request.Header.Get("X-DITAS-OperationID")
 
 	meter := MeterMessage{
 		OperationID:    operationID,

@@ -39,7 +39,7 @@ func NewResoruceCache(blueprint *spec.BlueprintType) ResouceCache {
 
 			cache.pathMatcher = append(cache.pathMatcher, compile(v.Path))
 		}
-
+		//TODO: XXX this is a hack (if anything to get corret corrolation)
 		sort.Sort(sorter(cache.pathMatcher))
 
 	}

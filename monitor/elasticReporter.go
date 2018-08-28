@@ -20,7 +20,6 @@ import (
 
 	"github.com/DITAS-Project/TUBUtil/util"
 	"github.com/olivere/elastic"
-	log "github.com/sirupsen/logrus"
 )
 
 type elasticReporter struct {
@@ -35,6 +34,10 @@ type elasticReporter struct {
 //will fail if no elastic client can be built
 //otherwise retunrs a worker handler
 func NewElasticReporter(config Configuration, queue chan MeterMessage) (elasticReporter, error) {
+
+	util.SetLogger(logger)
+	util.SetLog(log)
+
 	util.WaitForAvailible(config.ElasticSearchURL, nil)
 
 	client, err := elastic.NewClient(

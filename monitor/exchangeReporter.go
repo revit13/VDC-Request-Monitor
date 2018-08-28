@@ -19,8 +19,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type exchangeReporter struct {

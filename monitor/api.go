@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -79,6 +78,10 @@ func readConfig() (Configuration, error) {
 	if err != nil {
 		log.Error("failed to load config", err)
 		return configuration, err
+	}
+
+	if viper.GetBool("verbose") {
+		viper.Debug()
 	}
 
 	viper.Unmarshal(&configuration)

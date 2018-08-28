@@ -27,6 +27,7 @@ import (
 
 	opentracing "github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/kabukky/httpscerts"
@@ -36,8 +37,18 @@ import (
 
 	spec "github.com/DITAS-Project/blueprint-go"
 	"github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
 )
+
+var logger = logrus.New()
+var log = logrus.NewEntry(logger)
+
+func SetLogger(nLogger *logrus.Logger) {
+	logger = nLogger
+}
+
+func SetLog(entty *logrus.Entry) {
+	log = entty
+}
 
 //RequestMonitor data struct
 type RequestMonitor struct {

@@ -21,7 +21,6 @@ import (
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
-	log "github.com/sirupsen/logrus"
 )
 
 func (mon *RequestMonitor) serve(w http.ResponseWriter, req *http.Request) {

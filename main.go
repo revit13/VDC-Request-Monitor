@@ -4,10 +4,30 @@ import (
 	"flag"
 
 	"github.com/DITAS-Project/VDC-Request-Monitor/monitor"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
+
+var (
+	Build string
+)
+
+var logger = logrus.New()
+var log *logrus.Entry
+
+func init() {
+	if Build == "" {
+		Build = "Debug"
+	}
+	logger.Formatter = new(prefixed.TextFormatter)
+	logger.SetLevel(logrus.DebugLevel)
+	log = logger.WithFields(logrus.Fields{
+		"prefix": "req-mon",
+		"build":  Build,
+	})
+}
 
 func main() {
 	viper.SetConfigName("monitor")
@@ -28,11 +48,19 @@ func main() {
 
 	//setup cmd interface
 	flag.String("elastic", viper.GetString("ElasticSearchURL"), "used to define the elasticURL")
+	flag.Bool("verbose", false, "for verbose logging")
+
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
-	log.SetLevel(log.DebugLevel)
+	if viper.GetBool("verbose") {
+
+		logger.SetLevel(logrus.DebugLevel)
+	}
+
+	monitor.SetLogger(logger)
+	monitor.SetLog(log)
 
 	//
 	mon, err := monitor.NewManger()

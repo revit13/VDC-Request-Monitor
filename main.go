@@ -31,10 +31,11 @@ func init() {
 
 func main() {
 	viper.SetConfigName("monitor")
-	viper.AddConfigPath("/.config/")
 	viper.AddConfigPath("/opt/blueprint/")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("/.config/")
 	viper.AddConfigPath(".config/")
+	viper.AddConfigPath(".")
+
 	//setup defaults
 	viper.SetDefault("Endpoint", "http://localhost:8080")
 	viper.SetDefault("ElasticSearchURL", "http://localhost:9200")
@@ -55,7 +56,6 @@ func main() {
 	viper.BindPFlags(pflag.CommandLine)
 
 	if viper.GetBool("verbose") {
-
 		logger.SetLevel(logrus.DebugLevel)
 	}
 

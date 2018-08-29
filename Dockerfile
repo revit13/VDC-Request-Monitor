@@ -10,7 +10,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a --installsuffix cgo --ldflags="-w -s -X
 
 FROM alpine:3.4
 COPY --from=build /go/src/github.com/DITAS-Project/VDC-Request-Monitor/request-monitor request-monitor
-ADD .config/monitor.json.example .config/monitor.json
+#ADD .config/monitor.json.example .config/monitor.json
 EXPOSE 80
 EXPOSE 443
 CMD [ "./request-monitor" ]

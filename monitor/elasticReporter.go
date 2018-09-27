@@ -42,10 +42,13 @@ func NewElasticReporter(config Configuration, queue chan MeterMessage) (elasticR
 
 	client, err := elastic.NewClient(
 		elastic.SetURL(config.ElasticSearchURL),
+		elastic.SetSniff(false),
 	)
 
+	log.Debugf("using %s as ES endpoint", config.ElasticSearchURL)
+
 	if err != nil {
-		log.Error("failed to connect to elastic serach")
+		log.Error("failed to connect to elastic serach", err)
 		return elasticReporter{}, err
 	}
 

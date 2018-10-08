@@ -123,8 +123,15 @@ func (mon *RequestMonitor) responseInterceptor(resp *http.Response) error {
 		operationID = resp.Request.Header.Get("X-DITAS-OperationID")
 	}
 
+	if resp.Request == nil {
+		log.Warn("Could not close response, due to empty request")
+		return nil
+	}
+
 	if requestID == "" {
+
 		requestID = mon.generateRequestID(resp.Request.RemoteAddr)
+
 	}
 
 	meter := MeterMessage{
